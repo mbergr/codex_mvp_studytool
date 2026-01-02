@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Guitar Practice Log</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Guitar Practice Log</h1>
+            <p class="subtitle">Track your practice in seconds.</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="flash {{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <section class="card">
+            <h2>Add Entry</h2>
+            <form method="post" action="{{ url_for('web.create_entry') }}" class="entry-form">
+                <label for="duration_minutes">Duration (minutes)</label>
+                <input id="duration_minutes" name="duration_minutes" type="number" min="1" required>
+
+                <label for="notes">Notes (optional)</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="What did you practice?"></textarea>
+
+                <button type="submit">Save</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Recent Entries</h2>
+            {% if entries %}
+                <ul class="entries">
+                    {% for entry in entries %}
+                        <li class="entry">
+                            <div class="entry-main">
+                                <div class="entry-time">{{ entry.practiced_at.strftime('%b %d, %Y %I:%M %p') if entry.practiced_at else 'Unknown time' }}</div>
+                                <div class="entry-duration">{{ entry.duration_minutes }} min</div>
+                            </div>
+                            {% if entry.notes %}
+                                <div class="entry-notes">{{ entry.notes }}</div>
+                            {% endif %}
+                            <form method="post" action="{{ url_for('web.delete_entry', entry_id=entry.id) }}" class="delete-form" onsubmit="return confirm('Delete this entry?');">
+                                <button type="submit" class="link-button">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty">No practice logged yet. Add your first session!</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
